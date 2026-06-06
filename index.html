@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Clicker Game</title>
+    <style>
+        /* CSS: গেমের ডিজাইন এবং স্টাইল */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background-color: #111827; 
+            color: white; 
+            margin: 0; 
+            overflow: hidden; 
+        }
+        h1 { margin-top: 20px; color: #fbbf24; }
+        
+        #stats { 
+            display: flex; 
+            justify-content: center; 
+            gap: 50px; 
+            font-size: 22px; 
+            margin: 15px; 
+            font-weight: bold;
+        }
+        
+        button { 
+            padding: 12px 30px; 
+            font-size: 18px; 
+            background-color: #10b981; 
+            color: white;
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.2s;
+        }
+        button:hover { background-color: #059669; }
+        button:disabled { background-color: #4b5563; cursor: not-allowed; }
+
+        /* গেম খেলার জায়গা */
+        #game-area { 
+            width: 100vw; 
+            height: 65vh; 
+            position: relative; 
+            background-color: #1f2937; 
+            border-top: 3px solid #374151; 
+            border-bottom: 3px solid #374151; 
+            margin-top: 20px;
+            overflow: hidden; 
+        }
+
+        /* কয়েনের ডিজাইন */
+        .coin { 
+            width: 60px; 
+            height: 60px; 
+            background: radial-gradient(circle, #fde047 0%, #eab308 100%);
+            border-radius: 50%; 
+            position: absolute; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-weight: bold; 
+            font-size: 24px;
+            color: #854d0e; 
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.6); 
+            border: 3px solid #ca8a04;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🪙 Coin Clicker!</h1>
+    
+    <div id="stats">
+        <div>Score: <span id="score" style="color: #4ade80;">0</span></div>
+        <div>Time: <span id="time" style="color: #ef4444;">30</span>s</div>
+    </div>
+    
+    <button id="start-btn" onclick="startGame()">Start Game</button>
+    
+    <div id="game-area">
+        <h3 style="color: #9ca3af; margin-top: 100px;">গেম শুরু করতে 'Start Game' বাটনে ক্লিক করুন</h3>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 30; // গেমের সময় ৩০ সেকেন্ড
+        let timerInterval;
+        let gameArea = document.getElementById('game-area');
+        let scoreDisplay = document.getElementById('score');
+        let timeDisplay = document.getElementById('time');
+        let startBtn = document.getElementById('start-btn');
+        let coin = null;
+
+        // গেম শুরু করার ফাংশন
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            scoreDisplay.innerText = score;
+            timeDisplay.innerText = timeLeft;
+            startBtn.disabled = true;
+            gameArea.innerHTML = ''; // আগের লেখা মুছে ফেলা
+            
+            createCoin(); // প্রথম কয়েন তৈরি
+            
+            // টাইমার চালানো
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timeDisplay.innerText = timeLeft;
+                
+                // সময় শেষ হলে গেম ওভার
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000); // প্রতি ১ সেকেন্ডে কল হবে
+        }
+
+        // নতুন জায়গায় কয়েন তৈরি করার ফাংশন
+        function createCoin() {
+            if (timeLeft <= 0) return;
+            
+            // আগের কয়েন থাকলে সেটা মুছে ফেলো
+            if (coin) {
+                coin.remove();
+            }
+
+            // নতুন কয়েন বানানো
+            coin = document.createElement('div');
+            coin.classList.add('coin');
+            coin.innerText = '$';
+            
+            // স্ক্রিনের মাপ অনুযায়ী রেনডম জায়গা (Random Position) বের করা
+            let maxX = gameArea.clientWidth - 70;
+            let maxY = gameArea.clientHeight - 70;
+            let randomX = Math.floor(Math.random() * maxX);
+            let randomY = Math.floor(Math.random() * maxY);
+            
+            coin.style.left = randomX + 'px';
+            coin.style.top = randomY + 'px';
+            
+            // কয়েনে ক্লিক করলে কী হবে
+            coin.onclick = () => {
+                score += 5; // প্রতি ক্লিকে ৫ পয়েন্ট
+                scoreDisplay.innerText = score;
+                createCoin(); // ক্লিক করার সাথে সাথে কয়েন অন্য জায়গায় চলে যাবে
+            };
+            
+            gameArea.appendChild(coin);
+        }
+
+        // গেম শেষ হওয়ার ফাংশন
+        function endGame() {
+            clearInterval(timerInterval); // টাইমার বন্ধ করা
+            startBtn.disabled = false;
+            startBtn.innerText = "Play Again"; // বাটন আপডেট করা
+            
+            // স্ক্রিনে রেজাল্ট দেখানো
+            gameArea.innerHTML = `
+                <div style="margin-top: 80px;">
+                    <h2 style="color: #ef4444; font-size: 30px;">Time's Up! ⏰</h2>
+                    <h2 style="color: #fde047; font-size: 25px;">Your Total Score: ${score}</h2>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+
