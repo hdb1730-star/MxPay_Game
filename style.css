@@ -1,0 +1,66 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #000; /* সম্পূর্ণ কালো ব্যাকগ্রাউন্ড */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+}
+
+canvas {
+    display: block;
+}
+
+#scoreContainer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px #0ff;
+    z-index: 10;
+}
+
+#gameOverModal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(10, 10, 20, 0.9);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    border: 2px solid #0ff;
+    box-shadow: 0 0 20px #0ff;
+    z-index: 20;
+}
+
+.hidden {
+    display: none;
+}
+
+.neon-text {
+    font-size: 40px;
+    margin: 0 0 20px 0;
+    color: #f0f;
+    text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
+}
+
+#restartBtn {
+    padding: 12px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: transparent;
+    color: #0ff;
+    border: 2px solid #0ff;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #0ff;
+    transition: 0.3s;
+}
+
+#restartBtn:hover {
+    background-color: #0ff;
+    color: #000;
+}
+
