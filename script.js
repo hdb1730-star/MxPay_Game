@@ -5,7 +5,6 @@ const gameOverModal = document.getElementById('gameOverModal');
 const finalScore = document.getElementById('finalScore');
 const restartBtn = document.getElementById('restartBtn');
 
-// ফুল স্ক্রিন সেট করা
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -13,6 +12,19 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
+
+// --- সাউন্ড ইফেক্ট (Sound Effects) ---
+const shootSound = new Audio('https://labs.phaser.io/assets/audio/SoundEffects/blaster.mp3');
+const explosionSound = new Audio('https://labs.phaser.io/assets/audio/SoundEffects/explosion.mp3');
+shootSound.volume = 0.3;
+explosionSound.volume = 0.5;
+
+// --- গেমের ছবি (Images) ---
+const playerImg = new Image();
+playerImg.src = 'https://labs.phaser.io/assets/sprites/ship.png'; // স্পেসশিপের ছবি
+
+const enemyImg = new Image();
+enemyImg.src = 'https://labs.phaser.io/assets/sprites/space-baddie.png'; // এলিয়েনের ছবি
 
 // গেম ভেরিয়েবল
 let score = 0;
@@ -25,17 +37,12 @@ let frames = 0;
 // প্লেয়ার (স্পেসশিপ)
 const player = {
     x: canvas.width / 2,
-    y: canvas.height - 60,
-    radius: 20,
-    color: '#0ff',
+    y: canvas.height - 80,
+    width: 50,
+    height: 50,
     draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = this.color;
-        ctx.fill();
-        ctx.shadowBlur = 0; // রিসেট
+        // ছবি আঁকা
+        ctx.drawImage(playerImg, this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
     }
 };
 
@@ -47,13 +54,13 @@ canvas.addEventListener('mousemove', (e) => {
     player.x = e.clientX;
 });
 
-// লেজার/গুলি (Projectiles)
+// লেজার/গুলি
 class Projectile {
     constructor(x, y, velocity) {
         this.x = x;
         this.y = y;
-        this.radius = 5;
-        this.color = '#fff';
+        this.radius = 4;
+        this.color = '#0f0'; // সবুজ গুলি
         this.velocity = velocity;
     }
     draw() {
@@ -68,23 +75,17 @@ class Projectile {
     }
 }
 
-// শত্রু (Enemies)
+// শত্রু (এলিয়েন)
 class Enemy {
-    constructor(x, y, radius, color, velocity) {
+    constructor(x, y, width, height, velocity) {
         this.x = x;
         this.y = y;
-        this.radius = radius;
-        this.color = color;
+        this.width = width;
+        this.height = height;
         this.velocity = velocity;
     }
     draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = this.color;
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        ctx.drawImage(enemyImg, this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
     }
     update() {
         this.draw();
@@ -100,7 +101,7 @@ class Particle {
         this.radius = radius;
         this.color = color;
         this.velocity = velocity;
-        this.alpha = 1; // Fading effect
+        this.alpha = 1;
     }
     draw() {
         ctx.save();
@@ -115,41 +116,41 @@ class Particle {
         this.draw();
         this.x += this.velocity.x;
         this.y += this.velocity.y;
-        this.alpha -= 0.01; // ধীরে ধীরে গায়েব হবে
+        this.alpha -= 0.02;
     }
 }
 
 // শত্রু তৈরি করা
 function spawnEnemies() {
     if (frames % 60 === 0) {
-        const radius = Math.random() * (30 - 10) + 10;
-        const x = Math.random() * (canvas.width - radius * 2) + radius;
-        const color = `hsl(${Math.random() * 360}, 100%, 50%)`; // Random Neon Color
-        const velocity = Math.random() * 3 + 1;
-        enemies.push(new Enemy(x, 0 - radius, radius, color, velocity));
+        const width = 40;
+        const height = 40;
+        const x = Math.random() * (canvas.width - width) + width / 2;
+        const velocity = Math.random() * 2 + 1.5;
+        enemies.push(new Enemy(x, -50, width, height, velocity));
     }
 }
 
 // মেইন গেম লুপ
 function animate() {
     animationId = requestAnimationFrame(animate);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // লেজ ইফেক্টের জন্য
+    ctx.fillStyle = 'rgba(0, 0, 15, 0.5)'; // স্পেস ব্যাকগ্রাউন্ড ইফেক্ট
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     player.draw();
     
-    // অটো ফায়ারিং (প্রতি ১০ ফ্রেমে একবার গুলি বের হবে)
-    if (frames % 10 === 0) {
-        projectiles.push(new Projectile(player.x, player.y, 10));
+    // অটো ফায়ারিং এবং সাউন্ড
+    if (frames % 15 === 0) {
+        projectiles.push(new Projectile(player.x, player.y - 20, 10));
+        // গুলি করার সাউন্ড প্লে করা
+        shootSound.currentTime = 0; 
+        shootSound.play().catch(e => console.log("Click to enable sound")); 
     }
 
     // পার্টিকেল আপডেট
     particles.forEach((particle, index) => {
-        if (particle.alpha <= 0) {
-            particles.splice(index, 1);
-        } else {
-            particle.update();
-        }
+        if (particle.alpha <= 0) particles.splice(index, 1);
+        else particle.update();
     });
 
     // লেজার আপডেট
@@ -166,7 +167,7 @@ function animate() {
 
         // প্লেয়ারের সাথে ধাক্কা লাগলে গেম ওভার
         const distToPlayer = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-        if (distToPlayer - enemy.radius - player.radius < 1) {
+        if (distToPlayer < 30) {
             cancelAnimationFrame(animationId);
             gameOverModal.classList.remove('hidden');
             finalScore.innerText = score;
@@ -176,12 +177,16 @@ function animate() {
             const distToEnemy = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
             
             // গুলি শত্রুর গায়ে লাগলে
-            if (distToEnemy - enemy.radius - projectile.radius < 1) {
-                // বিস্ফোরণ তৈরি করা
-                for (let i = 0; i < enemy.radius * 2; i++) {
-                    particles.push(new Particle(projectile.x, projectile.y, Math.random() * 3, enemy.color, {
-                        x: (Math.random() - 0.5) * (Math.random() * 6),
-                        y: (Math.random() - 0.5) * (Math.random() * 6)
+            if (distToEnemy < 25) {
+                // বিস্ফোরণের সাউন্ড প্লে করা
+                explosionSound.currentTime = 0;
+                explosionSound.play().catch(e => console.log("Audio play error"));
+
+                // বিস্ফোরণের আগুন তৈরি করা
+                for (let i = 0; i < 15; i++) {
+                    particles.push(new Particle(projectile.x, projectile.y, Math.random() * 3, '#f97316', {
+                        x: (Math.random() - 0.5) * 5,
+                        y: (Math.random() - 0.5) * 5
                     }));
                 }
                 
@@ -212,11 +217,20 @@ function initGame() {
     animate();
 }
 
-// রিস্টার্ট বাটন
 restartBtn.addEventListener('click', () => {
     initGame();
 });
 
-// প্রথমবার গেম শুরু
-initGame();
-                      
+// সাউন্ড পলিসির জন্য স্ক্রিনে একবার ক্লিক বা টাচ করলে গেম শুরু হবে
+window.addEventListener('click', () => {
+    if(frames === 0) initGame();
+}, { once: true });
+window.addEventListener('touchstart', () => {
+    if(frames === 0) initGame();
+}, { once: true });
+
+// স্ক্রিনে নির্দেশিকা দেখানো
+ctx.fillStyle = "white";
+ctx.font = "20px Arial";
+ctx.textAlign = "center";
+ctx.fillText("গেম শুরু করতে স্ক্রিনে টাচ করুন বা ক্লিক করুন", canvas.width/2, canvas.height/2);
