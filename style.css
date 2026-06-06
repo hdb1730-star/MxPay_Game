@@ -1,7 +1,8 @@
 body {
     margin: 0;
     overflow: hidden;
-    background-color: #000; /* সম্পূর্ণ কালো ব্যাকগ্রাউন্ড */
+    background: url('https://labs.phaser.io/assets/skies/space3.png') repeat-y;
+    background-size: cover;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
 }
@@ -10,57 +11,69 @@ canvas {
     display: block;
 }
 
-#scoreContainer {
+/* টপ বার ডিজাইন */
+#topBar {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 10px #0ff;
+    top: 0; left: 0;
+    width: 100%; height: 60px;
+    background: rgba(17, 24, 39, 0.9);
+    border-bottom: 2px solid #3b82f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    box-sizing: border-box;
     z-index: 10;
 }
 
-#gameOverModal {
+#topBar button {
+    background: #1f2937;
+    color: white;
+    border: 1px solid #3b82f6;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#scoreBoard {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fbbf24;
+}
+
+/* পপ-আপ স্ক্রিন ডিজাইন */
+#startScreen, #gameOverModal {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(10, 10, 20, 0.9);
-    padding: 40px;
+    background: rgba(17, 24, 39, 0.95);
+    padding: 30px;
     border-radius: 15px;
     text-align: center;
-    border: 2px solid #0ff;
-    box-shadow: 0 0 20px #0ff;
+    border: 2px solid #3b82f6;
     z-index: 20;
+    width: 80%;
+    max-width: 350px;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+#startScreen h1 { color: #10b981; margin-top: 0; }
+
+#startPlayBtn, #restartBtn {
+    margin-top: 20px;
+    padding: 12px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    width: 100%;
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
-
-.neon-text {
-    font-size: 40px;
-    margin: 0 0 20px 0;
-    color: #f0f;
-    text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
-}
-
-#restartBtn {
-    padding: 12px 30px;
-    font-size: 18px;
-    font-weight: bold;
-    background-color: transparent;
-    color: #0ff;
-    border: 2px solid #0ff;
-    border-radius: 25px;
-    cursor: pointer;
-    box-shadow: 0 0 10px #0ff;
-    transition: 0.3s;
-}
-
-#restartBtn:hover {
-    background-color: #0ff;
-    color: #000;
-}
-
