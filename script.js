@@ -12,13 +12,13 @@ canvas.height = window.innerHeight;
 
 // গেমের ছবি (Assets)
 const playerImg = new Image();
-playerImg.src = 'https://labs.phaser.io/assets/sprites/player.png'; // ফাইটার জেট
+playerImg.src = 'https://labs.phaser.io/assets/sprites/player.png'; 
 
 const enemyImg = new Image();
-enemyImg.src = 'https://labs.phaser.io/assets/sprites/mine.png'; // শত্রুর মিসাইল/মাইন
+enemyImg.src = 'https://labs.phaser.io/assets/sprites/mine.png'; 
 
 const bulletImg = new Image();
-bulletImg.src = 'https://labs.phaser.io/assets/sprites/bullet.png'; // প্লেয়ারের ফায়ার
+bulletImg.src = 'https://labs.phaser.io/assets/sprites/bullet.png'; 
 
 // সাউন্ড (Sounds)
 const shootSound = new Audio('https://labs.phaser.io/assets/audio/SoundEffects/lazer.wav');
@@ -31,7 +31,8 @@ let animationId;
 let enemies = [];
 let projectiles = [];
 let frames = 0;
-let bgY = 0; // ব্যাকগ্রাউন্ড ঘোরানোর জন্য
+let bgY = 0; 
+let isGameRunning = false; // গেম লক করার ভেরিয়েবল
 
 // প্লেয়ারের অবজেক্ট
 const player = {
@@ -44,12 +45,14 @@ const player = {
     }
 };
 
-// টাচ কন্ট্রোল
+// টাচ কন্ট্রোল (গেম চালু না হলে কাজ করবে না)
 canvas.addEventListener('touchmove', (e) => {
+    if (!isGameRunning) return; // গেম শুরু না হলে লক থাকবে
     player.x = e.touches[0].clientX;
     player.y = e.touches[0].clientY;
 });
 canvas.addEventListener('mousemove', (e) => {
+    if (!isGameRunning) return; 
     player.x = e.clientX;
     player.y = e.clientY;
 });
@@ -91,7 +94,7 @@ class Enemy {
 }
 
 function spawnEnemies() {
-    if (frames % 40 === 0) { // শত্রুর স্পিড বাড়ানো হয়েছে
+    if (frames % 40 === 0) { 
         const size = Math.random() * (40 - 25) + 25;
         const x = Math.random() * (canvas.width - size) + size / 2;
         const velocity = Math.random() * 3 + 2;
@@ -100,6 +103,8 @@ function spawnEnemies() {
 }
 
 function animate() {
+    if (!isGameRunning) return;
+    
     animationId = requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -109,7 +114,7 @@ function animate() {
 
     player.draw();
     
-    // ফায়ারিং লজিক (প্রতি ১৫ ফ্রেমে)
+    // ফায়ারিং লজিক 
     if (frames % 15 === 0) {
         projectiles.push(new Projectile(player.x, player.y - 20));
         shootSound.currentTime = 0; 
@@ -131,10 +136,12 @@ function animate() {
         // প্লেয়ারের সাথে ধাক্কা
         const distToPlayer = Math.hypot(player.x - enemy.x, player.y - enemy.y);
         if (distToPlayer < player.width/2 + enemy.width/2 - 10) {
+            isGameRunning = false; // গেম ওভার হলে লক
             cancelAnimationFrame(animationId);
-            explosionSound.play();
-            gameOverModal.classList.remove('hidden');
-            document.getElementById('topBar').style.display = 'none'; // গেম ওভারে টপ বার লুকানো
+            explosionSound.play().catch(()=>{});
+            
+            gameOverModal.style.display = 'block'; // গেম ওভার স্ক্রিন দেখানো
+            document.getElementById('topBar').style.display = 'none'; 
             finalScore.innerText = score;
         }
 
@@ -160,17 +167,22 @@ function animate() {
     spawnEnemies();
 }
 
+// গেম শুরু করার মেইন ফাংশন
 function initGame() {
     score = 0;
     scoreEl.innerText = score;
     frames = 0;
     enemies = [];
     projectiles = [];
-    document.getElementById('topBar').style.display = 'flex';
-    gameOverModal.classList.add('hidden');
-    startScreen.classList.add('hidden');
+    isGameRunning = true; // গেম আনলক করা হলো
     
-    // সাউন্ড পলিসি আনলক করার জন্য একটি ব্ল্যাংক সাউন্ড প্লে
+    document.getElementById('topBar').style.display = 'flex';
+    
+    // স্ক্রিনগুলো চিরতরে লুকিয়ে ফেলা
+    startScreen.style.display = 'none';
+    gameOverModal.style.display = 'none';
+    
+    // সাউন্ড পলিসি আনলক 
     shootSound.play().then(() => {
         shootSound.pause();
         shootSound.currentTime = 0;
@@ -179,6 +191,6 @@ function initGame() {
     animate();
 }
 
-// বাটন ক্লিক ইভেন্ট (এখানেই ব্রাউজার সাউন্ড পারমিশন দেয়)
+// বাটন ক্লিক ইভেন্ট 
 startPlayBtn.addEventListener('click', initGame);
 restartBtn.addEventListener('click', initGame);
